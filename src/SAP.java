@@ -19,27 +19,29 @@ public class SAP {
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w){
-        return findSap(v, w, 0);
+        return findSap(v, w)[0];
     }
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
-        return findSap(v, w, 1);
+        return findSap(v, w)[1];
     }
 
-    private int findSap(int v, int w, int type) {
+    private int[] findSap(int v, int w) {
         validateVertex(v);
         validateVertex(w);
+        //result[0]表示path, result[1] 表示ancestor
+        int[] result = new int[2];
+        result[0] = -1;
+        result[1] = -1;
         if (v == w) {
-            if(type == 0){//查找最短路径值
-                return 0;
-            }else { //查找最短路径index
-                return v;
-            }
+            result[0] = 0;
+            result[1] = v;
+            return result;
         }
         //初始化两个输入参数的祖先数组，数组的index表示图的点
         // 数组默认值为-1，表示该点还没被访问过
-        // 数组的值不为1时，表示盖点已经被访问过，且值表示距离输入参数的值
+        // 数组的值不为1时，表示该点已经被访问过，且值表示距离输入参数的值
         int[] vAncestorArr = new int[G.V()];
         int[] wAncestorArr = new int[G.V()];
         for (int i = 0; i < G.V(); i++) {
@@ -66,14 +68,11 @@ public class SAP {
             sap = findSapByBFS(wAncestorArr, wQueue, ancestors, path);
             path++;
         }
-        if (sap == -1) {
-            return -1;
+        if (sap != -1) {
+            result[0] = vAncestorArr[sap] + wAncestorArr[sap];
+            result[1] = sap;
         }
-        if (type == 0) {//路径值
-            return vAncestorArr[sap] + wAncestorArr[sap];
-        }else { //祖先值
-            return sap;
-        }
+        return result;
     }
 
     /**
@@ -107,9 +106,11 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w){
-        if (v == null || w == null) {
+        /*if (v == null || w == null) {
             throw new IllegalArgumentException("SAP.length() argument is Null!");
         }
+        int lengthV = 0;*/
+
         return -1;
     }
 
@@ -118,6 +119,7 @@ public class SAP {
         if (v == null || w == null) {
             throw new IllegalArgumentException("SAP.length() argument is Null!");
         }
+
         return -1;
     }
 
