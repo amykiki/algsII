@@ -119,7 +119,10 @@ public class SAP {
         if (v == null || w == null) {
             throw new IllegalArgumentException("SAP.length() argument is Null!");
         }
+        int ancestor = -1;
+        for (Integer vv : v) {
 
+        }
         return -1;
     }
 

@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 /**
@@ -11,8 +12,9 @@ import edu.princeton.cs.algs4.StdOut;
  *  and return a noun At for which dt is maximum.
  */
 public class Outcast {
+    private WordNet wordNet;
     public Outcast(WordNet wordNet) {
-
+        this.wordNet = wordNet;
     }
     // given an array of WordNet nouns, return an outcast
     public String outcast(String[] nouns){
@@ -22,10 +24,18 @@ public class Outcast {
     public static void main(String[] args) {
         WordNet wordNet = new WordNet(args[0], args[1]);
         Outcast outcast = new Outcast(wordNet);
-        for (int t = 2; t < args.length; t++) {
+        while (!StdIn.isEmpty()) {
+            String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\datas\\wordnet-testing\\wordnet\\";
+            String file = StdIn.readString();
+            String filename = filepath + file;
+            In in = new In(filename);
+            String[] nouns = in.readAllStrings();
+            StdOut.println(file + ": " + outcast.outcast(nouns));
+        }
+        /*for (int t = 2; t < args.length; t++) {
             In in = new In(args[t]);
             String[] nouns = in.readAllStrings();
             StdOut.println(args[t] + ": " + outcast.outcast(nouns));
-        }
+        }*/
     }
 }
