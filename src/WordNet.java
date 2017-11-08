@@ -1,33 +1,38 @@
+import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.ST;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class WordNet {
     private Digraph G;
-    private ST<String, Integer> st; //key和index对应
-    private String[] synsetsArr; //keys <---> index,通过index获取synset
+    private ST<String, Bag<Integer>> st; //key和index,一个单词可能对应多个释义id对应
+    private Map<Integer, String> synsetsMap; //index和synset对应
     private SAP sap;
     public WordNet(String synsets, String hypernyms) {
         if (synsets == null || hypernyms == null) {
             throw new IllegalArgumentException("Null Argument IS Not Allowed");
         }
         st = new ST<>();
+        synsetsMap = new HashMap<>();
         In in = new In(synsets);
         while (in.hasNextLine()) {
             String[] arr = in.readLine().split(",");
             Integer index = Integer.valueOf(arr[0]);
             String[] keys = arr[1].split(" ");
-            for (int i = 0; i < keys.length; i++) {
-                st.put(keys[i], index);
-            }
-        }
-        synsetsArr = new String[st.size()];
-        for (String key : st.keys()) {
-            int index = st.get(key);
-            if (synsetsArr[index] == null) {
-                synsetsArr[index] = key;
-            }else {
-                synsetsArr[index] = key + " " + synsetsArr[index];
+            synsetsMap.put(index, arr[1]);
+            for (String key : keys) {
+                Bag<Integer> bag;
+                if (st.contains(key)) {
+                    bag = st.get(key);
+                    bag.add(index);
+                }else {
+                    bag = new Bag<>();
+                    bag.add(index);
+                    st.put(key, bag);
+                }
             }
         }
         G = new Digraph(st.size());
@@ -61,8 +66,8 @@ public class WordNet {
      */
     public int distance(String nounA, String nounB) {
         checkArguments(nounA, nounB);
-        int v = st.get(nounA);
-        int w = st.get(nounB);
+        Bag<Integer> v = st.get(nounA);
+        Bag<Integer> w = st.get(nounB);
         return sap.length(v, w);
     }
 
@@ -70,10 +75,10 @@ public class WordNet {
     // in a shortest ancestral path
     public String sap(String nounA, String nounB) {
         checkArguments(nounA, nounB);
-        int v = st.get(nounA);
-        int w = st.get(nounB);
+        Bag<Integer> v = st.get(nounA);
+        Bag<Integer> w = st.get(nounB);
         int ancestor = sap.ancestor(v, w);
-        return synsetsArr[ancestor];
+        return synsetsMap.get(ancestor);
     }
 
     private void checkArguments(String nounA, String nounB) {
