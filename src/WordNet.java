@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class WordNet {
     private Digraph G;
-    private ST<String, Bag<Integer>> st; //key和index,一个单词可能对应多个释义id对应
+    private Map<String, Bag<Integer>> st; //key和index,一个单词可能对应多个释义id对应
     private Map<Integer, String> synsetsMap; //index和synset对应
     private SAP sap;
     public WordNet(String synsets, String hypernyms) {
         if (synsets == null || hypernyms == null) {
             throw new IllegalArgumentException("Null Argument IS Not Allowed");
         }
-        st = new ST<>();
+        st = new HashMap<>();
         synsetsMap = new HashMap<>();
         In in = new In(synsets);
         while (in.hasNextLine()) {
@@ -25,7 +25,7 @@ public class WordNet {
             synsetsMap.put(index, arr[1]);
             for (String key : keys) {
                 Bag<Integer> bag;
-                if (st.contains(key)) {
+                if (st.containsKey(key)) {
                     bag = st.get(key);
                     bag.add(index);
                 }else {
@@ -35,7 +35,7 @@ public class WordNet {
                 }
             }
         }
-        G = new Digraph(st.size());
+        G = new Digraph(synsetsMap.size());
         in = new In(hypernyms);
         while (in.hasNextLine()) {
             String[] arr = in.readLine().split(",");
@@ -50,12 +50,12 @@ public class WordNet {
 
     // returns all WrokdNet nouns
     public Iterable<String> nouns() {
-        return st.keys();
+        return st.keySet();
     }
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
-        return st.contains(word);
+        return st.containsKey(word);
     }
 
     //distance between nounA and nounB
@@ -68,6 +68,8 @@ public class WordNet {
         checkArguments(nounA, nounB);
         Bag<Integer> v = st.get(nounA);
         Bag<Integer> w = st.get(nounB);
+//        printBag(v);
+//        printBag(w);
         return sap.length(v, w);
     }
 
@@ -88,6 +90,14 @@ public class WordNet {
         if (!isNoun(nounA) || !isNoun(nounB)) {
             throw new IllegalArgumentException("Not Wordnet Noun!");
         }
+    }
+
+    private void printBag(Bag<Integer> bag) {
+        System.out.println();
+        for (Integer i : bag) {
+            System.out.print(i + " ");
+        }
+        System.out.println();
     }
 
     public static void main(String[] args) {
