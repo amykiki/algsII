@@ -59,7 +59,7 @@ public class Outcast {
         return distMap.get(key);
     }
     public static void main(String[] args) {
-        WordNet wordNet = new WordNet(args[0], args[1]);
+        /*WordNet wordNet = new WordNet(args[0], args[1]);
         Outcast outcast = new Outcast(wordNet);
         while (!StdIn.isEmpty()) {
             String filepath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\wordnet\\";
@@ -68,11 +68,13 @@ public class Outcast {
             In in = new In(filename);
             String[] nouns = in.readAllStrings();
             StdOut.println(file + ": " + outcast.outcast(nouns));
-        }
-        /*for (int t = 2; t < args.length; t++) {
+        }*/
+        WordNet wordnet = new WordNet(args[0], args[1]);
+        Outcast outcast = new Outcast(wordnet);
+        for (int t = 2; t < args.length; t++) {
             In in = new In(args[t]);
             String[] nouns = in.readAllStrings();
             StdOut.println(args[t] + ": " + outcast.outcast(nouns));
-        }*/
+        }
     }
 }

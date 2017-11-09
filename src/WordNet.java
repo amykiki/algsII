@@ -1,7 +1,6 @@
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.ST;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +27,8 @@ public class WordNet {
                 if (st.containsKey(key)) {
                     bag = st.get(key);
                     bag.add(index);
-                }else {
+                }
+                else {
                     bag = new Bag<>();
                     bag.add(index);
                     st.put(key, bag);
@@ -39,9 +39,9 @@ public class WordNet {
         in = new In(hypernyms);
         while (in.hasNextLine()) {
             String[] arr = in.readLine().split(",");
-            int v = Integer.valueOf(arr[0]);
-            for(int i = 1; i < arr.length; i++) {
-                int w = Integer.valueOf(arr[i]);
+            int v = Integer.parseInt(arr[0]);
+            for (int i = 1; i < arr.length; i++) {
+                int w = Integer.parseInt(arr[i]);
                 G.addEdge(v, w);
             }
         }
@@ -62,7 +62,8 @@ public class WordNet {
     /**
      * Semantic relatedness refers to the degree to which two concepts are related.
      * We define the semantic relatedness of two wordnet nouns A and B as follows:
-     * distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
+     * distance(A, B) = distance is the minimum length of any ancestral path
+     * between any synset v of A and any synset w of B.
      */
     public int distance(String nounA, String nounB) {
         checkArguments(nounA, nounB);
@@ -73,7 +74,8 @@ public class WordNet {
         return sap.length(v, w);
     }
 
-    // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
+    // a synset (second field of synsets.txt) that is
+    // the common ancestor of nounA and nounB
     // in a shortest ancestral path
     public String sap(String nounA, String nounB) {
         checkArguments(nounA, nounB);
@@ -100,8 +102,6 @@ public class WordNet {
         System.out.println();
     }
 
-    public static void main(String[] args) {
-        WordNet wordNet = new WordNet(args[0], args[1]);
-    }
+    public static void main(String[] args) { }
 
 }
