@@ -30,16 +30,26 @@ public class Outcast {
             throw new IllegalArgumentException("Outcast Null Argument IS Not Allowed");
         }
         int n = nouns.length;
-        Map<Integer, Integer> distMap = new HashMap<>(n*(n+1)/2);
         int maxDistance = -1;
         int maxSap = -1;
+        int distsSize = n*(n+1)/2 - n;
+        int[] subIn = new int[n];
+        subIn[0] = 1;
+        int[] dists = new int[distsSize];
+        for (int i = 1; i < n; i++)
+        {
+            subIn[i] = subIn[i-1] + i +1;
+        }
+        for (int i = 0; i < distsSize; i++) {
+            dists[i] = -1;
+        }
         for (int i = 0; i < n; i++) {
             int sum = 0;
             for (int j = 0; j < i; j++) {
-                sum += getDistance(i, j, nouns, distMap);
+                sum += getDistance(j, i, nouns, dists, subIn);
             }
-            for (int k = i; k < n; k++) {
-                sum += getDistance(i, k, nouns, distMap);
+            for (int k = i + 1; k < n; k++) {
+                sum += getDistance(i, k, nouns, dists, subIn);
             }
             if (maxDistance < sum) {
                 maxDistance = sum;
@@ -52,18 +62,19 @@ public class Outcast {
         return null;
     }
 
-    private int getDistance(int x, int y, String[] nouns, Map<Integer, Integer> distMap) {
+    private int getDistance(int x, int y, String[] nouns, int[] dists, int[] subIn) {
         int key = x * nouns.length + y;
-        if (!distMap.containsKey(key)) {
-            distMap.put(key, wordNet.distance(nouns[x], nouns[y]));
+        int index = key - subIn[x];
+        if (dists[index] == -1) {
+            dists[index] = wordNet.distance(nouns[x], nouns[y]);
         }
-        return distMap.get(key);
+        return dists[index];
     }
     public static void main(String[] args) {
         /*WordNet wordNet = new WordNet(args[0], args[1]);
         Outcast outcast = new Outcast(wordNet);
         while (!StdIn.isEmpty()) {
-            String filepath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\wordnet\\";
+            String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\datas\\wordnet-testing\\wordnet\\";
             String file = StdIn.readString();
             String filename = filepath + file;
             In in = new In(filename);
