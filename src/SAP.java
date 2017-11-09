@@ -9,13 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SAP {
-    private Digraph G;
+    private final Digraph G;
     public SAP(Digraph G)
     {
         if (G == null) {
             throw new IllegalArgumentException("Digraph G is Null!");
         }
-        this.G = G;
+        this.G = new Digraph(G);
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path

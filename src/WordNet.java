@@ -1,5 +1,6 @@
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 import java.util.HashMap;
@@ -45,6 +46,11 @@ public class WordNet {
                 G.addEdge(v, w);
             }
         }
+        //检查是否为cycle
+        DirectedCycle dc = new DirectedCycle(G);
+        if (dc.hasCycle()) {
+            throw new IllegalArgumentException("Graph Has Cycle!");
+        }
         sap = new SAP(G);
     }
 
@@ -55,6 +61,9 @@ public class WordNet {
 
     // is the word a WordNet noun?
     public boolean isNoun(String word) {
+        if (null == word) {
+            throw new IllegalArgumentException("word Not Null!");
+        }
         return st.containsKey(word);
     }
 
