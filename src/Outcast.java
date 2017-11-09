@@ -1,6 +1,4 @@
-import com.sun.glass.ui.Size;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.HashMap;
@@ -9,8 +7,10 @@ import java.util.Map;
 /**
  * Semantic relatedness refers to the degree to which two concepts are related.
  *  We define the semantic relatedness of two wordnet nouns A and B as follows:
- *  distance(A, B) = distance is the minimum length of any ancestral path between any synset v of A and any synset w of B.
- *  Outcast detection. Given a list of wordnet nouns A1, A2, ..., An, which noun is the least related to the others?
+ *  distance(A, B) = distance is the minimum length of any ancestral path
+ *  between any synset v of A and any synset w of B.
+ *  Outcast detection. Given a list of wordnet nouns A1, A2, ..., An,
+ *  which noun is the least related to the others?
  *  To identify an outcast, compute the sum of the distances between each noun and every other one:
  *  di = dist(Ai, A1) + dist(Ai, A2) + ... + dist(Ai, An)
  *  and return a noun At for which dt is maximum.
@@ -24,7 +24,8 @@ public class Outcast {
         this.wordNet = wordNet;
     }
     // given an array of WordNet nouns, return an outcast
-    public String outcast(String[] nouns){
+    public String outcast(String[] nouns)
+    {
         if (nouns == null || nouns.length == 0) {
             throw new IllegalArgumentException("Outcast Null Argument IS Not Allowed");
         }
@@ -32,12 +33,12 @@ public class Outcast {
         Map<Integer, Integer> distMap = new HashMap<>(n*(n+1)/2);
         int maxDistance = -1;
         int maxSap = -1;
-        for(int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             int sum = 0;
-            for(int j = 0; j < i; j++) {
+            for (int j = 0; j < i; j++) {
                 sum += getDistance(i, j, nouns, distMap);
             }
-            for(int k = i; k < n; k++) {
+            for (int k = i; k < n; k++) {
                 sum += getDistance(i, k, nouns, distMap);
             }
             if (maxDistance < sum) {
