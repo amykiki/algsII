@@ -1,9 +1,6 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Semantic relatedness refers to the degree to which two concepts are related.
  *  We define the semantic relatedness of two wordnet nouns A and B as follows:
@@ -33,22 +30,35 @@ public class Outcast {
         int maxDistance = -1;
         int maxSap = -1;
         int distsSize = n*(n+1)/2 - n;
+        //subIn为坐标映射关系数组
         int[] subIn = new int[n];
+        /**
+         * 根据outcast计算定义，要求得n个字符串的outcast，需要建立一个n*n的二维数组来存储d[i][j]
+         * 但分析可知，实际真正需要计算的d[i][j]只有n*(n+1)/2 - n个
+         * n*(n+1)/2表示的是1+2+3+...+n的值，减n是因为d[i][i]也不需要计算，直接为0
+         * subIn就为从d[i][j]二维坐标到一维坐标的映射。
+         * sub[i]表示对于第(i+1)行，d[i][j]，需要减去的数字才能转换成一维数组。
+         * 比如当n=5时，(2,3)本身对于的index为2*5+3 = 13,
+         * subIn[2] = 1 + 2 + 3 = 6,因此(2,3)映射一维坐标为13 - 6 = 7
+         */
         subIn[0] = 1;
-        int[] dists = new int[distsSize];
         for (int i = 1; i < n; i++)
         {
             subIn[i] = subIn[i-1] + i +1;
         }
+        //dists存储的是d[i][j]的值，i!=j && i < j
+        int[] dists = new int[distsSize];
         for (int i = 0; i < distsSize; i++) {
             dists[i] = -1;
         }
         for (int i = 0; i < n; i++) {
             int sum = 0;
             for (int j = 0; j < i; j++) {
+                //注意，getDistance的x要永远小于y
                 sum += getDistance(j, i, nouns, dists, subIn);
             }
             for (int k = i + 1; k < n; k++) {
+                //注意，getDistance的x要永远小于y
                 sum += getDistance(i, k, nouns, dists, subIn);
             }
             if (maxDistance < sum) {
@@ -74,7 +84,8 @@ public class Outcast {
         /*WordNet wordNet = new WordNet(args[0], args[1]);
         Outcast outcast = new Outcast(wordNet);
         while (!StdIn.isEmpty()) {
-            String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\datas\\wordnet-testing\\wordnet\\";
+            String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\
+            datas\\wordnet-testing\\wordnet\\";
             String file = StdIn.readString();
             String filename = filepath + file;
             In in = new In(filename);
