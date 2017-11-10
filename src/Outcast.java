@@ -83,10 +83,12 @@ public class Outcast {
     public static void main(String[] args) {
         /*WordNet wordNet = new WordNet(args[0], args[1]);
         Outcast outcast = new Outcast(wordNet);
-        while (!StdIn.isEmpty()) {
-            String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\
-            datas\\wordnet-testing\\wordnet\\";
-            String file = StdIn.readString();
+        String filepath = "D:\\codeproject\\githubProject\\algsII\\test-data\\datas" +
+                          "\\wordnet-testing\\wordnet\\";
+        String[] filenames = {"outcast2.txt", "outcast3.txt", "outcast4.txt", "outcast5.txt",
+                              "outcast5a.txt", "outcast7.txt", "outcast8.txt", "outcast8a.txt",
+                              "outcast8b.txt", "outcast8c.txt", "outcast9.txt", "outcast9a.txt"};
+        for (String file: filenames){
             String filename = filepath + file;
             In in = new In(filename);
             String[] nouns = in.readAllStrings();

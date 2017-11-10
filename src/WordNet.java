@@ -1,6 +1,5 @@
 import edu.princeton.cs.algs4.Bag;
 import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 import java.util.HashMap;
@@ -11,6 +10,14 @@ public class WordNet {
     private Map<String, Bag<Integer>> st; //key和index,一个单词可能对应多个释义id对应
     private Map<Integer, String> synsetsMap; //index和synset对应
     private SAP sap;
+    //=======以下变量为检查G是否为rootedDAG=======
+    //假设所有点起始都为根节点
+    //如果rootedV = 1,则表示只有一个根节点
+    private int rootedV;
+    private boolean[] marked;
+    private boolean[] onStack;
+    private boolean hasCycle = false;
+
     public WordNet(String synsets, String hypernyms) {
         if (synsets == null || hypernyms == null) {
             throw new IllegalArgumentException("Null Argument IS Not Allowed");
@@ -47,9 +54,11 @@ public class WordNet {
             }
         }
         //检查是否为cycle
-        DirectedCycle dc = new DirectedCycle(G);
-        if (dc.hasCycle()) {
-            throw new IllegalArgumentException("Graph Has Cycle!");
+        rootedV = G.V();
+        marked = new boolean[G.V()];
+        onStack = new boolean[G.V()];
+        if (!validateGraph()) {
+            throw new IllegalArgumentException("Graph NOT ROOTED DAG!");
         }
         sap = new SAP(G);
     }
@@ -110,6 +119,48 @@ public class WordNet {
         }
         System.out.println();
     }
+
+    /**
+     * 检查图片是否为rooted DAG
+     * 不能包含cycle，只能有一个根节点，所有点都能联通
+     */
+    private boolean validateGraph() {
+        for (int v = 0; v < G.V(); v++) {
+            if (hasCycle) {
+                break;
+            }
+            if (!marked[v]) {
+                dfs(v);
+            }
+        }
+        //rooted DAG
+        if (!hasCycle && rootedV == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    private void dfs(int v) {
+        marked[v] = true;
+        //判断节点是否有连出的线
+        if (!G.adj(v).iterator().hasNext()) {
+            return;
+        }
+        onStack[v] = true;
+        //节点有连出的线，那么节点就不是根节点
+        rootedV--;
+        for (int w : G.adj(v)) {
+            if (!marked[w]) {
+                dfs(w);
+            } else if (onStack[w]) { //存在cycle
+                hasCycle = true;
+                return;
+            }
+        }
+        onStack[v] = false;
+        return;
+    }
+
 
     public static void main(String[] args) { }
 
