@@ -12,15 +12,29 @@
 import edu.princeton.cs.algs4.Picture;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.awt.*;
+
 public class PrintEnergy {
 
+    public static void printPicture(Picture picture) {
+        int width = picture.width();
+        int height = picture.height();
+        for(int row = 0; row < height; row++) {
+            for(int col = 0; col < width; col++) {
+                Color color = picture.get(col, row);
+                StdOut.printf("(%d,%d,%d) ", color.getRed(), color.getGreen(), color.getBlue());
+            }
+            StdOut.println();
+        }
+    }
     public static void main(String[] args) {
         String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
         String fileName = "6x5.png";
+//        String fileName = "12x10.png";
         String picFile = filePath + fileName;
         Picture picture = new Picture(picFile);
         StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
-        
+        printPicture(picture);
         SeamCarver sc = new SeamCarver(picture);
         
         StdOut.printf("Printing energy calculated for each pixel.\n");        

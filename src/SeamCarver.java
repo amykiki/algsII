@@ -25,7 +25,7 @@ public class SeamCarver {
                 energySquares[row * width + col] = getEnergySquare(col, row);
             }
         }
-        genToplogicalOrder();
+        genToplogicalOrder(width, height);
 
     }
 
@@ -116,6 +116,24 @@ public class SeamCarver {
             edgeTo[dest] = v;
         }
     }
+
+    /**
+     * 去掉水平seam
+     * @param seam
+     */
+    public void removeHorizontalSeam(int[] seam) {
+
+    }
+
+    /**
+     * 去掉垂直的seam
+     * @param seam
+     */
+    public void removeVerticalSeam(int[] seam) {
+
+    }
+
+    // TODO: 2017/11/17 仅作为debug用 
     public double getEnergySquare(int col, int row) {
         validateHeight(row);
         validateWidth(col);
@@ -136,7 +154,7 @@ public class SeamCarver {
         return xSquare + ySquare;
     }
 
-    private void genToplogicalOrder() {
+    private void genToplogicalOrder(int width, int height) {
         Stack<Integer> stack = new Stack<>();
         int marked = 0;
         stack.push(0);
@@ -163,6 +181,7 @@ public class SeamCarver {
         }
     }
 
+    // TODO: 2017/11/17 仅作为debug用 
     public int[] getTopologic() {
         return toplogicOrder;
     }
