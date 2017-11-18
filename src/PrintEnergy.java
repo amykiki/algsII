@@ -29,12 +29,16 @@ public class PrintEnergy {
     }
     public static void main(String[] args) {
         String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
-        String fileName = "6x5.png";
+//        String fileName = "6x5.png";
 //        String fileName = "12x10.png";
+//        String fileName = "10x12.png";
+        String fileName = "chameleon.png";
+//        String fileName = "diagonals.png";
         String picFile = filePath + fileName;
         Picture picture = new Picture(picFile);
-        StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
+
         printPicture(picture);
+//        picture.show();
         SeamCarver sc = new SeamCarver(picture);
         
         StdOut.printf("Printing energy calculated for each pixel.\n");        
@@ -45,28 +49,37 @@ public class PrintEnergy {
             StdOut.println();
         }
 
-        for (int row = 0; row < sc.height(); row++) {
+        /*for (int row = 0; row < sc.height(); row++) {
             for (int col = 0; col < sc.width(); col++)
                 StdOut.printf("%-9.0f ", sc.getEnergySquare(col, row));
             StdOut.println();
-        }
+        }*/
 
-        int[] topological = sc.getTopologic();
+        /*int[] topological = sc.genToplogicalOrder(sc.width(), sc.height(), false);
         int count = 0;
         for(int i = 0; i < topological.length; i++) {
             StdOut.printf("(%2d,%-2d)", topological[i]/picture.width(), topological[i]%picture.width());
             if((++count) % 10 == 0){
                 StdOut.println();
             }
-        }
+        }*/
 
+        StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
         int[] verticalSeam = sc.findVerticalSeam();
         double sum = 0;
         for(int i = 0; i < verticalSeam.length; i++){
-            StdOut.printf("%-3d", verticalSeam[i]);
+            StdOut.printf("%-5d", verticalSeam[i]);
             sum += sc.energy(verticalSeam[i], i);
         }
-        StdOut.printf("Total energy = %f\n", sum);
+        StdOut.printf("\nTotal energy = %f\n", sum);
+
+        int[] horizonSeam = sc.findHorizontalSeam();
+        double horsum = 0;
+        for(int i = 0; i < horizonSeam.length; i++){
+            StdOut.printf("%-5d", horizonSeam[i]);
+            horsum += sc.energy(i, horizonSeam[i]);
+        }
+        StdOut.printf("\nTotal energy = %f\n", horsum);
     }
 
 }
