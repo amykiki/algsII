@@ -32,7 +32,7 @@ public class SeamCarver {
         validateWidth(col);
 
         int index = row*width + col;
-        return Math.sqrt(energySquares[index]);
+        return energySquares[index];
     }
 
     /**
@@ -308,12 +308,12 @@ public class SeamCarver {
                 throw new IllegalArgumentException("remove horizontal seam length " + seamIndices.length + " not equal to " + width);
             }
             carvedPic = new Picture(picture.width(), picture.height() - 1);
-            for(int row = 0; row < carvedPic.height(); row++) {
-                for (int col = 0; col < carvedPic.width(); col++) {
-                    if (col < seamIndices[row]) {
+            for(int col = 0; col < carvedPic.width(); col++) {
+                for (int row = 0; row < carvedPic.height(); row++) {
+                    if (row < seamIndices[col]) {
                         carvedPic.set(col, row, picture.get(col, row));
                     }else {
-                        carvedPic.set(col, row, picture.get(col + 1, row));
+                        carvedPic.set(col, row, picture.get(col, row + 1));
                     }
                 }
             }
@@ -325,12 +325,12 @@ public class SeamCarver {
                 throw new IllegalArgumentException("remove vertical seam length " + seamIndices.length + " not equal to " + height);
             }
             carvedPic = new Picture(picture.width() - 1, picture.height());
-            for(int col = 0; col < carvedPic.width(); col++) {
-                for(int row = 0; row < carvedPic.height(); row++) {
-                    if (row < seamIndices[col]) {
+            for(int row = 0; row < carvedPic.height(); row++) {
+                for(int col = 0; col < carvedPic.width(); col++) {
+                    if (col < seamIndices[row]) {
                         carvedPic.set(col, row, picture.get(col, row));
                     }else {
-                        carvedPic.set(col, row, picture.get(col, row + 1));
+                        carvedPic.set(col, row, picture.get(col+1, row));
                     }
                 }
             }
@@ -365,6 +365,6 @@ public class SeamCarver {
         double ySquare = Math.pow(colorDown.getRed() - colorUp.getRed(), 2)
                 + Math.pow(colorDown.getGreen() - colorUp.getGreen(), 2)
                 + Math.pow(colorDown.getBlue() - colorUp.getBlue(), 2);
-        return xSquare + ySquare;
+        return Math.sqrt(xSquare + ySquare);
     }
 }

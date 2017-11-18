@@ -32,7 +32,8 @@ public class PrintEnergy {
 //        String fileName = "6x5.png";
 //        String fileName = "12x10.png";
 //        String fileName = "10x12.png";
-        String fileName = "chameleon.png";
+        String fileName = "4x6.png";
+//        String fileName = "chameleon.png";
 //        String fileName = "diagonals.png";
         String picFile = filePath + fileName;
         Picture picture = new Picture(picFile);
