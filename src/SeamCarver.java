@@ -352,7 +352,7 @@ public class SeamCarver {
     }
     private double getEnergySquare(int col, int row) {
         if (row == 0 || row == (height - 1) || col == 0 || col == (width - 1)) {
-            return 1000 * 1000;
+            return 1000;
         }
         Color colorUp = picture.get(col, row - 1);
         Color colorDown = picture.get(col, row + 1);
