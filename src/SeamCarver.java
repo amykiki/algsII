@@ -394,9 +394,9 @@ public class SeamCarver {
                 }
                 for (int row = 0; row < carvedPic.height(); row++) {
                     if (row < currentRow) {
-                        carvedPic.set(col, row, picture.get(col, row));
+                        carvedPic.setRGB(col, row, picture.getRGB(col, row));
                     }else {
-                        carvedPic.set(col, row, picture.get(col, row + 1));
+                        carvedPic.setRGB(col, row, picture.getRGB(col, row + 1));
                     }
                 }
                 lastRow = currentRow;
@@ -422,9 +422,9 @@ public class SeamCarver {
                 }
                 for(int col = 0; col < carvedPic.width(); col++) {
                     if (col < currentCol) {
-                        carvedPic.set(col, row, picture.get(col, row));
+                        carvedPic.setRGB(col, row, picture.getRGB(col, row));
                     }else {
-                        carvedPic.set(col, row, picture.get(col+1, row));
+                        carvedPic.setRGB(col, row, picture.getRGB(col+1, row));
                     }
                 }
                 lastCol = currentCol;
