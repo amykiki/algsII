@@ -27,7 +27,39 @@ public class PrintEnergy {
             StdOut.println();
         }
     }
-    public static void main(String[] args) {
+
+    public static void testSeamCarver() {
+        String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
+        String[] fileNames = {"6x5.png", "4x6.png", "10x12.png", "3x7.png", "5x6.png", "7x3.png", "7x10.png",
+                "12x10.png", "stripes.png", "diagonals.png", "chameleon.png", "HJocean.png",
+                "1x8.png", "8x1.png", "1x1.png"};
+
+        for (String fileName : fileNames) {
+            String picFile = filePath + fileName;
+            Picture picture = new Picture(picFile);
+            SeamCarver sc = new SeamCarver(picture);
+            StdOut.println("\n=============START " + fileName + " START=============");
+            StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
+            int[] verticalSeam = sc.findVerticalSeam();
+            double sum = 0;
+            for(int i = 0; i < verticalSeam.length; i++){
+//                StdOut.printf("%-5d", verticalSeam[i]);
+                sum += sc.energy(verticalSeam[i], i);
+            }
+            StdOut.printf("Total vertical energy = %f\n", sum);
+
+            int[] horizonSeam = sc.findHorizontalSeam();
+            double horsum = 0;
+            for(int i = 0; i < horizonSeam.length; i++){
+//                StdOut.printf("%-5d", horizonSeam[i]);
+                horsum += sc.energy(i, horizonSeam[i]);
+            }
+            StdOut.printf("Total Horizontal energy = %f\n", horsum);
+            StdOut.println("=============END " + fileName + " END=============");
+        }
+    }
+
+    public static void debug() {
         String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
 //        String fileName = "6x5.png";
 //        String fileName = "12x10.png";
@@ -38,17 +70,17 @@ public class PrintEnergy {
         String picFile = filePath + fileName;
         Picture picture = new Picture(picFile);
 
-        printPicture(picture);
+//        printPicture(picture);
 //        picture.show();
         SeamCarver sc = new SeamCarver(picture);
-        
-        StdOut.printf("Printing energy calculated for each pixel.\n");        
+        sc.removeVerticalSeam(null);
+       /* StdOut.printf("Printing energy calculated for each pixel.\n");
 
         for (int row = 0; row < sc.height(); row++) {
             for (int col = 0; col < sc.width(); col++)
                 StdOut.printf("%7.2f ", sc.energy(col, row));
             StdOut.println();
-        }
+        }*/
 
         /*for (int row = 0; row < sc.height(); row++) {
             for (int col = 0; col < sc.width(); col++)
@@ -64,23 +96,10 @@ public class PrintEnergy {
                 StdOut.println();
             }
         }*/
-
-        StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
-        int[] verticalSeam = sc.findVerticalSeam();
-        double sum = 0;
-        for(int i = 0; i < verticalSeam.length; i++){
-            StdOut.printf("%-5d", verticalSeam[i]);
-            sum += sc.energy(verticalSeam[i], i);
-        }
-        StdOut.printf("\nTotal energy = %f\n", sum);
-
-        int[] horizonSeam = sc.findHorizontalSeam();
-        double horsum = 0;
-        for(int i = 0; i < horizonSeam.length; i++){
-            StdOut.printf("%-5d", horizonSeam[i]);
-            horsum += sc.energy(i, horizonSeam[i]);
-        }
-        StdOut.printf("\nTotal energy = %f\n", horsum);
+    }
+    public static void main(String[] args) {
+//        testSeamCarver();
+        debug();
     }
 
 }

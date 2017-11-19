@@ -7,12 +7,30 @@ public class SeamCarver {
     private Picture picture;
     private int height;
     private int width;
-    private double[] energySquares;
+    private double[] energy;
+
+    /**
+     * 注意以下属性是全局使用的，这些数组初始大小为picture的原始大小，
+     * 后续picture的缩减不会减小数组大小
+     * 所以需要注意坐标的边界值
+     */
+    private int[] toplogicOrder;
+    private double[] distTo;
+    private int[] edgeTo;
     public SeamCarver(Picture pic) {
+        if (pic == null) {
+            throw new IllegalArgumentException("Construtor pic should not be null!");
+        }
         picture = new Picture(pic);
         height = picture.height();
         width = picture.width();
-        energySquares = getPicEngerySqaures(width, height);
+        int N = width * height;
+        energy = new double[N];
+        //计算初始energy
+        caclPicEngery();
+        toplogicOrder = new int[N];
+        distTo = new double[N + 1];
+        edgeTo = new int[N + 1];
     }
 
     public Picture picture() {
@@ -32,7 +50,7 @@ public class SeamCarver {
         validateWidth(col);
 
         int index = row*width + col;
-        return energySquares[index];
+        return energy[index];
     }
 
     /**
@@ -48,7 +66,7 @@ public class SeamCarver {
         }
 
         int v = width*height;
-        int[] edgeTo = findEdgeTo(true);
+        findEdgeTo(true);
         for(int col = width() - 1; col >= 0; col--) {
             v = edgeTo[v];
             horizonSeam[col] = v / width;
@@ -69,7 +87,7 @@ public class SeamCarver {
         }
 
         int v = width*height;
-        int[] edgeTo = findEdgeTo(false);
+        findEdgeTo(false);
         for(int row = height - 1; row>= 0; row--) {
             v = edgeTo[v];
             verticalSeam[row] = v % width;
@@ -77,19 +95,18 @@ public class SeamCarver {
         return verticalSeam;
     }
 
-    private int[] findEdgeTo(boolean horizontal) {
+    private void findEdgeTo(boolean horizontal) {
         int N = width * height;
-        double[] distTo = new double[N + 1];
-        int[] edgeTo = new int[N + 1];
-
+        distTo[N] = Double.MAX_VALUE;
+        edgeTo[N] = -1;
         if (horizontal) {
             for(int row = 0; row < height; row++) {
-                distTo[row*width] = energySquares[row*width];
+                distTo[row*width] = energy[row*width];
                 edgeTo[row*width] = -1;
             }
         }else {
             for(int col = 0; col < width; col++) {
-                distTo[col] = energySquares[col];
+                distTo[col] = energy[col];
                 edgeTo[col] = -1;
             }
         }
@@ -108,10 +125,14 @@ public class SeamCarver {
                 edgeTo[row * width + col] = -1;
             }
         }
-        int[] toplogicOrder = genToplogicalOrder(width, height, horizontal);
-        distTo[N] = Double.MAX_VALUE;
-        edgeTo[N] = -1;
-        for(int i = 0; i < toplogicOrder.length; i++) {
+
+        /**
+         * 计算topological order注意这个数组是会被持续使用的，
+         * 因此i的最大值应为当前picture的大小 - 1
+         * 而不为topological数组的length
+         */
+        genToplogicalOrder(horizontal);
+        for(int i = 0; i < N; i++) {
             int index = toplogicOrder[i];
             int col = index % width;
             int row = index / width;
@@ -135,15 +156,14 @@ public class SeamCarver {
                 }
             }
         }
-        return edgeTo;
     }
     private void relax(double[] distTo, int[] edgeTo, int wCol, int wRow, int v){
         if (!validateCol(wCol) || !validateRow(wRow)) {
             return;
         }
         int w = wRow * width + wCol;
-        if (distTo[w] >= distTo[v] + energySquares[w]) {
-            distTo[w] = distTo[v] + energySquares[w];
+        if (distTo[w] >= distTo[v] + energy[w]) {
+            distTo[w] = distTo[v] + energy[w];
             edgeTo[w] = v;
         }
     }
@@ -162,8 +182,8 @@ public class SeamCarver {
     public void removeHorizontalSeam(int[] seam) {
         //[1]picture去除seam
         this.picture = carvedPicture(this.picture, true, seam);
-        //获取engergysqaure
-        energySquares = getPicEngerySqaures(width(), height());
+        //获取engergy数组
+        caclPicEngery();
     }
 
     /**
@@ -173,17 +193,16 @@ public class SeamCarver {
     public void removeVerticalSeam(int[] seam) {
         //picture去除seam
         this.picture = carvedPicture(this.picture, false, seam);
-        //获取engergysqaure
-        energySquares = getPicEngerySqaures(width(), height());
+        //获取engergy数组
+        caclPicEngery();
     }
 
-    private int[] genToplogicalOrder(int width, int height, boolean horizontal) {
+    private void genToplogicalOrder(boolean horizontal) {
         Stack<Integer> stack = new Stack<>();
         int marked = 0;
         stack.push(0);
         int next = 1;
         int N = width * height;
-        int[] toplogicOrder = new int[N];
         boolean[] visited = new boolean[N];
         int last = N - 1;
         while (marked != N) {
@@ -196,7 +215,7 @@ public class SeamCarver {
                 next++;
             }
             int peek = stack.peek();
-            boolean pushResult = true;
+            boolean pushResult;
             if (horizontal) {
                 pushResult = pushHorizontalStack(peek, stack, visited);
             }else {
@@ -210,7 +229,6 @@ public class SeamCarver {
                 last--;
             }
         }
-        return toplogicOrder;
     }
     
     private boolean pushStack(int i, Stack<Integer> stack, boolean[] visited) {
@@ -301,12 +319,7 @@ public class SeamCarver {
         Picture carvedPic;
 
         if (horizontal) {
-            if (picture.height() <= 1) {
-                throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
-            }
-            if (seamIndices.length != picture.width()) {
-                throw new IllegalArgumentException("remove horizontal seam length " + seamIndices.length + " not equal to " + width);
-            }
+            validateHorizontalSeamIndices(seamIndices);
             carvedPic = new Picture(picture.width(), picture.height() - 1);
             for(int col = 0; col < carvedPic.width(); col++) {
                 for (int row = 0; row < carvedPic.height(); row++) {
@@ -318,12 +331,7 @@ public class SeamCarver {
                 }
             }
         }else {
-            if (picture.width() <= 1) {
-                throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
-            }
-            if (seamIndices.length != picture.height()) {
-                throw new IllegalArgumentException("remove vertical seam length " + seamIndices.length + " not equal to " + height);
-            }
+            validateVerticalSeamIndices(seamIndices);
             carvedPic = new Picture(picture.width() - 1, picture.height());
             for(int row = 0; row < carvedPic.height(); row++) {
                 for(int col = 0; col < carvedPic.width(); col++) {
@@ -340,17 +348,63 @@ public class SeamCarver {
         return carvedPic;
     }
 
-    private double[] getPicEngerySqaures(int width, int height) {
-        int N = height * width;
-        double[] picEnergySquares = new double[N];
-        for (int col = 0; col < width; col++) {
-            for(int row = 0; row < height; row++) {
-                picEnergySquares[row * width + col] = getEnergySquare(col, row);
+    private void validateVerticalSeamIndices(int[] seamIndices) {
+        if (picture.width() <= 1) {
+            throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
+        }
+        if (seamIndices.length != picture.height()) {
+            throw new IllegalArgumentException("remove vertical seam length " + seamIndices.length + " not equal to " + height);
+        }
+        int lastCol = -1;
+        for(int i = 0; i < seamIndices.length; i++) {
+            int currentCol = seamIndices[i];
+            if (!validateCol(currentCol)) {
+                throw new IllegalArgumentException("removeVertical Index is invalid:" + currentCol);
+            }
+            if (i == 0) {
+                lastCol = currentCol;
+            }else {
+                if (Math.abs(currentCol - lastCol) >= 2) {
+                    throw new IllegalArgumentException("removeVertical adjecnt index is invalid: lastcol" + lastCol
+                            + ", current Col" + currentCol);
+                }
+                lastCol = currentCol;
             }
         }
-        return picEnergySquares;
     }
-    private double getEnergySquare(int col, int row) {
+
+    private void validateHorizontalSeamIndices(int[] seamIndices) {
+        if (picture.height() <= 1) {
+            throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
+        }
+        if (seamIndices.length != picture.width()) {
+            throw new IllegalArgumentException("remove horizontal seam length " + seamIndices.length + " not equal to " + width);
+        }
+        int lastRow = -1;
+        for(int i = 0; i < seamIndices.length; i++) {
+            int currentRow = seamIndices[i];
+            if (!validateRow(currentRow)) {
+                throw new IllegalArgumentException("remove Horizon Index is invalid:" + currentRow);
+            }
+            if (i == 0) {
+                lastRow = currentRow;
+            }else {
+                if (Math.abs(currentRow - lastRow) >= 2) {
+                    throw new IllegalArgumentException("remove Horizon adjecnt index is invalid: lastRow" + lastRow
+                            + ", current Row" + currentRow);
+                }
+                lastRow = currentRow;
+            }
+        }
+    }
+    private void caclPicEngery() {
+        for (int col = 0; col < width; col++) {
+            for(int row = 0; row < height; row++) {
+                energy[row * width + col] = caclPixelEnergy(col, row);
+            }
+        }
+    }
+    private double caclPixelEnergy(int col, int row) {
         if (row == 0 || row == (height - 1) || col == 0 || col == (width - 1)) {
             return 1000;
         }
