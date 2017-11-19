@@ -12,4 +12,16 @@ public class CommonUtil {
         }
         StdOut.println();
     }
+
+    public static void printIntArray(int[] arr, int width) {
+        int count = 0;
+        for(int i = 0; i < arr.length; i++) {
+            StdOut.printf("%-5d", arr[i]);
+            count++;
+            if (count % width == 0) {
+                StdOut.println();
+            }
+        }
+        StdOut.println();
+    }
 }

@@ -15,6 +15,10 @@ import edu.princeton.cs.algs4.StdOut;
 import java.awt.*;
 
 public class PrintEnergy {
+    public static String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
+    public static String[] fileNames = {"6x5.png", "4x6.png", "10x12.png", "3x7.png", "5x6.png", "7x3.png", "7x10.png",
+            "12x10.png", "stripes.png", "diagonals.png", "chameleon.png", "HJocean.png",
+            "1x8.png", "8x1.png", "1x1.png"};
 
     public static void printPicture(Picture picture) {
         int width = picture.width();
@@ -29,11 +33,6 @@ public class PrintEnergy {
     }
 
     public static void testSeamCarver() {
-        String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
-        String[] fileNames = {"6x5.png", "4x6.png", "10x12.png", "3x7.png", "5x6.png", "7x3.png", "7x10.png",
-                "12x10.png", "stripes.png", "diagonals.png", "chameleon.png", "HJocean.png",
-                "1x8.png", "8x1.png", "1x1.png"};
-
         for (String fileName : fileNames) {
             String picFile = filePath + fileName;
             Picture picture = new Picture(picFile);
@@ -60,7 +59,6 @@ public class PrintEnergy {
     }
 
     public static void debug() {
-        String filePath = "D:\\codeProject\\git_repo\\algsII\\test-data\\datas\\seam-testing\\seam\\";
 //        String fileName = "6x5.png";
 //        String fileName = "12x10.png";
 //        String fileName = "10x12.png";
@@ -97,9 +95,46 @@ public class PrintEnergy {
             }
         }*/
     }
+
+    public static Picture genPic(String fileName) {
+        String picFile = filePath + fileName;
+        Picture picture = new Picture(picFile);
+        return picture;
+    }
+    /*public static void testTopoOrder() {
+//        Picture picture = genPic("diagonals.png");
+        Picture picture = genPic("12x10.png");
+        SeamCarver sc = new SeamCarver(picture);
+        int[] scOrder = sc.topoOrder(false);
+        int[] order = sc.quickVerticalTopoOrder();
+        CommonUtil.printIntArray(scOrder, 10);
+        CommonUtil.printIntArray(order, 10);
+
+        for(int i = 0; i < scOrder.length; i++) {
+            if (scOrder[i] != order[i]) {
+                StdOut.println("ERROR, order not equal, scorder[" + i + "] = " + scOrder[i]
+                + ", order[" + i + "] = " + order[i]);
+                break;
+            }
+        }
+
+        int[] schorOrder = sc.topoOrder(true);
+        int[] horOrder = sc.quickHorizontalTopoOrder();
+        CommonUtil.printIntArray(schorOrder, 10);
+        CommonUtil.printIntArray(horOrder, 10);
+
+        for(int i = 0; i < schorOrder.length; i++) {
+            if (schorOrder[i] != horOrder[i]) {
+                StdOut.println("ERROR, order not equal, schorOrder[" + i + "] = " + schorOrder[i]
+                        + ", horOrder[" + i + "] = " + horOrder[i]);
+                break;
+            }
+        }
+    }*/
     public static void main(String[] args) {
-//        testSeamCarver();
-        debug();
+        testSeamCarver();
+//        debug();
+//        testTopoOrder();
     }
 
 }
