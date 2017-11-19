@@ -34,7 +34,7 @@ public class SeamCarver {
     }
 
     public Picture picture() {
-        return this.picture;
+        return new Picture(picture);
     }
 
     public int width() {
