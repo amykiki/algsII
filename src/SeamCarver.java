@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.Picture;
-import edu.princeton.cs.algs4.Stack;
 
 import java.awt.Color;
 
@@ -185,10 +184,60 @@ public class SeamCarver {
      * @param seam
      */
     public void removeHorizontalSeam(int[] seam) {
-        //[1]picture去除seam
-        picture = carvedPicture(true, seam);
-        //获取engergy数组
-        caclPicEngery();
+        if (seam == null) {
+            throw new IllegalArgumentException("seam Indices should not be null!");
+        }
+        Picture carvedPic;
+        if (height <= 1) {
+            throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
+        }
+        if (seam.length != width) {
+            throw new IllegalArgumentException("remove horizontal seam length " + seam.length + " not equal to " + width);
+        }
+        int lastRow = -1;
+        carvedPic = new Picture(width, height - 1);
+        int nextHeight = carvedPic.height();
+        double[] nextEnergy = new double[width * nextHeight];
+        int[] changes = new int[width * 2];
+        initArray(changes, -1);
+        for(int col = 0; col < carvedPic.width(); col++) {
+            int currentRow = seam[col];
+            if (!validateRow(currentRow)) {
+                throw new IllegalArgumentException("remove Horizon Index is invalid:" + currentRow);
+            }
+            if (col != 0 && Math.abs(currentRow - lastRow) >= 2) {
+                throw new IllegalArgumentException("remove Horizon adjecnt index is invalid: lastRow" + lastRow
+                        + ", current Row" + currentRow);
+            }
+            for (int row = 0; row < carvedPic.height(); row++) {
+                if (row < currentRow) {
+                    carvedPic.setRGB(col, row, picture.getRGB(col, row));
+                }else {
+                    carvedPic.setRGB(col, row, picture.getRGB(col, row + 1));
+                }
+
+                if (row < (currentRow - 1)) {
+                    nextEnergy[row * width + col] = energy[row * width + col];
+                } else if (row > (currentRow + 1)) {
+                    nextEnergy[(row-1) * width + col] = energy[row * width + col];
+                } else if (row == (currentRow - 1)) {
+                    changes[col * 2] = currentRow - 1;
+                }else if(row == (currentRow + 1)){
+                    changes[col * 2 + 1] = currentRow;
+                }
+            }
+            lastRow = currentRow;
+        }
+        height = height - 1;
+        picture = carvedPic;
+        for(int col = 0; col < width; col++) {
+            for(int j = 0; j < 2; j++) {
+                int row = changes[col * 2 + j];
+                if(!validateCol(row))
+                    continue;
+                nextEnergy[row * width + col] = caclPixelEnergy(col, row);
+            }
+        }
     }
 
     /**
@@ -196,10 +245,61 @@ public class SeamCarver {
      * @param seam
      */
     public void removeVerticalSeam(int[] seam) {
-        //picture去除seam
-        picture = carvedPicture(false, seam);
-        //获取engergy数组
-        caclPicEngery();
+        if (seam == null) {
+            throw new IllegalArgumentException("seam Indices should not be null!");
+        }
+        Picture carvedPic;
+        if (width <= 1) {
+            throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
+        }
+        if (seam.length != height) {
+            throw new IllegalArgumentException("remove vertical seam length " + seam.length + " not equal to " + height);
+        }
+        int lastCol = -1;
+        carvedPic = new Picture(width - 1, height);
+        int[] changes = new int[height * 2];
+        double[] nextEnergy = new double[carvedPic.width() * height];
+        initArray(changes, -1);
+        int nextWidth = carvedPic.width();
+        for(int row = 0; row < carvedPic.height(); row++) {
+            int currentCol = seam[row];
+            if (!validateCol(currentCol)) {
+                throw new IllegalArgumentException("removeVertical Index is invalid:" + currentCol);
+            }
+            if (row != 0 && Math.abs(currentCol - lastCol) >= 2) {
+                throw new IllegalArgumentException("removeVertical adjecnt index is invalid: lastcol" + lastCol
+                        + ", current Col" + currentCol);
+            }
+            for(int col = 0; col < carvedPic.width(); col++) {
+                if (col < currentCol) {
+                    carvedPic.setRGB(col, row, picture.getRGB(col, row));
+                }else {
+                    carvedPic.setRGB(col, row, picture.getRGB(col+1, row));
+                }
+
+                if (col < (currentCol - 1)) {
+                    nextEnergy[row * nextWidth + col] = energy[row * width + col];
+                } else if (col > (currentCol + 1)) {
+                    nextEnergy[row * nextWidth + col - 1] = energy[row * width + col];
+                } else if (col == (currentCol - 1)) {
+                    changes[row * 2] = currentCol - 1;
+                }else if(col == (currentCol + 1)){
+                    changes[row * 2 + 1] = currentCol;
+                }
+            }
+            lastCol = currentCol;
+        }
+        width = width - 1;
+        picture = carvedPic;
+        for(int row = 0; row < height; row++) {
+            for(int j = 0; j < 2; j++) {
+                int col = changes[row * 2 + j];
+                if(!validateCol(col))
+                    continue;
+                nextEnergy[row * width + col] = caclPixelEnergy(col, row);
+            }
+        }
+
     }
 
     /*private void genToplogicalOrder(boolean horizontal) {
@@ -288,7 +388,8 @@ public class SeamCarver {
         }
         return quickTopo;
     }
-    private boolean pushStack(int i, Stack<Integer> stack, boolean[] visited) {
+
+    /*private boolean pushStack(int i, Stack<Integer> stack, boolean[] visited) {
         int col = i % width;
         int nextRow = i /width + 1;
 
@@ -335,6 +436,11 @@ public class SeamCarver {
             return true;
         }
         return false;
+    }*/
+    private void initArray(int[] arr, int value) {
+        for(int i = 0; i < arr.length; i++) {
+            arr[i] = value;
+        }
     }
     private void validateWidth(int col) {
         if (col < 0 || col >= width) {
@@ -360,78 +466,6 @@ public class SeamCarver {
             return false;
         }
         return true;
-    }
-
-    /**
-     * picture去掉seam，返回去除seam的picture，更新height和width
-     * @param horizontal
-     * @param seamIndices
-     * @return
-     */
-    private Picture carvedPicture(boolean horizontal, int[] seamIndices) {
-        if (seamIndices == null) {
-            throw new IllegalArgumentException("seam Indices should not be null!");
-        }
-        Picture carvedPic;
-
-        if (horizontal) {
-            if (height <= 1) {
-                throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
-            }
-            if (seamIndices.length != width) {
-                throw new IllegalArgumentException("remove horizontal seam length " + seamIndices.length + " not equal to " + width);
-            }
-            int lastRow = -1;
-            carvedPic = new Picture(width, height - 1);
-            for(int col = 0; col < carvedPic.width(); col++) {
-                int currentRow = seamIndices[col];
-                if (!validateRow(currentRow)) {
-                    throw new IllegalArgumentException("remove Horizon Index is invalid:" + currentRow);
-                }
-                if (col != 0 && Math.abs(currentRow - lastRow) >= 2) {
-                    throw new IllegalArgumentException("remove Horizon adjecnt index is invalid: lastRow" + lastRow
-                            + ", current Row" + currentRow);
-                }
-                for (int row = 0; row < carvedPic.height(); row++) {
-                    if (row < currentRow) {
-                        carvedPic.setRGB(col, row, picture.getRGB(col, row));
-                    }else {
-                        carvedPic.setRGB(col, row, picture.getRGB(col, row + 1));
-                    }
-                }
-                lastRow = currentRow;
-            }
-            height = height - 1;
-        }else {
-            if (width <= 1) {
-                throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
-            }
-            if (seamIndices.length != height) {
-                throw new IllegalArgumentException("remove vertical seam length " + seamIndices.length + " not equal to " + height);
-            }
-            int lastCol = -1;
-            carvedPic = new Picture(width - 1, height);
-            for(int row = 0; row < carvedPic.height(); row++) {
-                int currentCol = seamIndices[row];
-                if (!validateCol(currentCol)) {
-                    throw new IllegalArgumentException("removeVertical Index is invalid:" + currentCol);
-                }
-                if (row != 0 && Math.abs(currentCol - lastCol) >= 2) {
-                    throw new IllegalArgumentException("removeVertical adjecnt index is invalid: lastcol" + lastCol
-                            + ", current Col" + currentCol);
-                }
-                for(int col = 0; col < carvedPic.width(); col++) {
-                    if (col < currentCol) {
-                        carvedPic.setRGB(col, row, picture.getRGB(col, row));
-                    }else {
-                        carvedPic.setRGB(col, row, picture.getRGB(col+1, row));
-                    }
-                }
-                lastCol = currentCol;
-            }
-            width = width - 1;
-        }
-        return carvedPic;
     }
 
     private void caclPicEngery() {
