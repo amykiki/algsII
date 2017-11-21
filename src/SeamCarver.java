@@ -3,26 +3,28 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    private Picture picture;
+//    private Picture picture;
     private int height;
     private int width;
     private double[] energy;
-
+    private int[] rgbs;
     public SeamCarver(Picture pic) {
         if (pic == null) {
             throw new IllegalArgumentException("Construtor pic should not be null!");
         }
-        picture = new Picture(pic);
+//        picture = new Picture(pic);
         height = pic.height();
         width = pic.width();
+        rgbs = new int[width * height];
         int N = width * height;
         energy = new double[N];
+        picToRgbs(pic);
         //计算初始energy
         caclPicEngery();
     }
 
     public Picture picture() {
-        return new Picture(picture);
+        return rgbsToPic();
     }
 
     public int width() {
@@ -174,7 +176,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("seam Indices should not be null!");
         }
-        Picture carvedPic;
+        int[] carvedRgbs;
         if (height <= 1) {
             throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
         }
@@ -182,12 +184,12 @@ public class SeamCarver {
             throw new IllegalArgumentException("remove horizontal seam length " + seam.length + " not equal to " + width);
         }
         int lastRow = -1;
-        carvedPic = new Picture(width, height - 1);
-        int nextHeight = carvedPic.height();
+        carvedRgbs = new int[(height - 1) * width];
+        int nextHeight = height - 1;
         double[] nextEnergy = new double[width * nextHeight];
         int[] changes = new int[width * 2];
         initArray(changes, -1);
-        for(int col = 0; col < carvedPic.width(); col++) {
+        for(int col = 0; col < width; col++) {
             int currentRow = seam[col];
             if (!validateRow(currentRow)) {
                 throw new IllegalArgumentException("remove Horizon Index is invalid:" + currentRow);
@@ -196,30 +198,26 @@ public class SeamCarver {
                 throw new IllegalArgumentException("remove Horizon adjecnt index is invalid: lastRow" + lastRow
                         + ", current Row" + currentRow);
             }
-            for (int row = 0; row < picture.height(); row++) {
-                if (row == currentRow) {
-                    continue;
-                }
-                if (row < currentRow) {
-                    carvedPic.setRGB(col, row, picture.getRGB(col, row));
-                }else {
-                    carvedPic.setRGB(col, row - 1, picture.getRGB(col, row));
-                }
-
-                if (row < (currentRow - 1)) {
-                    nextEnergy[row * width + col] = energy[row * width + col];
-                } else if (row > (currentRow + 1)) {
-                    nextEnergy[(row-1) * width + col] = energy[row * width + col];
-                } else if (row == (currentRow - 1)) {
+            for(int row = 0; row < currentRow; row++) {
+                carvedRgbs[row * width + col] = rgbs[row * width + col];
+                if (row == currentRow - 1) {
                     changes[col * 2] = currentRow - 1;
-                }else if(row == (currentRow + 1)){
+                }else {
+                    nextEnergy[row * width + col] = energy[row * width + col];
+                }
+            }
+            for(int row = currentRow + 1; row < height; row++) {
+                carvedRgbs[(row - 1) * width + col] = rgbs[row * width + col];
+                if (row == currentRow + 1) {
                     changes[col * 2 + 1] = currentRow;
+                }else {
+                    nextEnergy[(row-1) * width + col] = energy[row * width + col];
                 }
             }
             lastRow = currentRow;
         }
         height = height - 1;
-        picture = carvedPic;
+        rgbs = carvedRgbs;
         for(int col = 0; col < width; col++) {
             for(int j = 0; j < 2; j++) {
                 int row = changes[col * 2 + j];
@@ -239,7 +237,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("seam Indices should not be null!");
         }
-        Picture carvedPic;
+        int[] carvedRgbs;
         if (width <= 1) {
             throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
         }
@@ -247,12 +245,12 @@ public class SeamCarver {
             throw new IllegalArgumentException("remove vertical seam length " + seam.length + " not equal to " + height);
         }
         int lastCol = -1;
-        carvedPic = new Picture(width - 1, height);
+        carvedRgbs = new int[(width - 1) * height];
         int[] changes = new int[height * 2];
-        double[] nextEnergy = new double[carvedPic.width() * height];
+        double[] nextEnergy = new double[(width - 1) * height];
         initArray(changes, -1);
-        int nextWidth = carvedPic.width();
-        for(int row = 0; row < carvedPic.height(); row++) {
+        int nextWidth = width - 1;
+        for(int row = 0; row < height; row++) {
             int currentCol = seam[row];
             if (!validateCol(currentCol)) {
                 throw new IllegalArgumentException("removeVertical Index is invalid:" + currentCol);
@@ -261,30 +259,23 @@ public class SeamCarver {
                 throw new IllegalArgumentException("removeVertical adjecnt index is invalid: lastcol" + lastCol
                         + ", current Col" + currentCol);
             }
-            for(int col = 0; col < picture.width(); col++) {
-                if (col == currentCol) {
-                    continue;
-                }
-                if (col < currentCol) {
-                    carvedPic.setRGB(col, row, picture.getRGB(col, row));
-                }else {
-                    carvedPic.setRGB(col - 1, row, picture.getRGB(col, row));
-                }
 
-                if (col < (currentCol - 1)) {
-                    nextEnergy[row * nextWidth + col] = energy[row * width + col];
-                } else if (col > (currentCol + 1)) {
-                    nextEnergy[row * nextWidth + col - 1] = energy[row * width + col];
-                } else if (col == (currentCol - 1)) {
-                    changes[row * 2] = currentCol - 1;
-                }else if(col == (currentCol + 1)){
-                    changes[row * 2 + 1] = currentCol;
-                }
+            System.arraycopy(rgbs, row*width, carvedRgbs, row*nextWidth, currentCol);
+            if ((currentCol + 1) < width) {
+                System.arraycopy(rgbs, row*width + currentCol + 1, carvedRgbs, row*nextWidth + currentCol, width - currentCol - 1);
             }
+            if (currentCol - 1 > 0) {
+                System.arraycopy(energy, row * width, nextEnergy, row * nextWidth, currentCol - 1);
+            }
+            if (currentCol + 2 < width) {
+                System.arraycopy(energy, row * width + currentCol + 2, nextEnergy, row * nextWidth + currentCol +1, width - (currentCol + 2));
+            }
+            changes[row * 2] = currentCol - 1;
+            changes[row * 2 + 1] = currentCol;
             lastCol = currentCol;
         }
         width = width - 1;
-        picture = carvedPic;
+        rgbs = carvedRgbs;
         for(int row = 0; row < height; row++) {
             for(int j = 0; j < 2; j++) {
                 int col = changes[row * 2 + j];
@@ -345,6 +336,23 @@ public class SeamCarver {
         return quickTopo;
     }
 
+    private void picToRgbs(Picture pic) {
+        for(int row = 0; row < pic.height(); row++) {
+            for(int col = 0; col < pic.width(); col++) {
+                rgbs[row * width + col] = pic.getRGB(col, row);
+            }
+        }
+    }
+
+    private Picture rgbsToPic() {
+        Picture pic = new Picture(width, height);
+        for(int row = 0; row < height; row++) {
+            for(int col = 0; col < width; col++) {
+                pic.setRGB(col, row, rgbs[row*width + col]);
+            }
+        }
+        return pic;
+    }
     private void initArray(int[] arr, int value) {
         for(int i = 0; i < arr.length; i++) {
             arr[i] = value;
@@ -387,10 +395,10 @@ public class SeamCarver {
         if (row == 0 || row == (height - 1) || col == 0 || col == (width - 1)) {
             return 1000;
         }
-        Color colorUp = picture.get(col, row - 1);
-        Color colorDown = picture.get(col, row + 1);
-        Color colorLeft = picture.get(col - 1, row);
-        Color colorRight = picture.get(col + 1, row);
+        Color colorUp = new Color(rgbs[(row - 1) * width + col]);
+        Color colorDown = new Color(rgbs[(row + 1) * width + col]);
+        Color colorLeft = new Color(rgbs[row * width + col - 1]);
+        Color colorRight = new Color(rgbs[row * width + col + 1]);
 
         double xSquare = Math.pow(colorRight.getRed() - colorLeft.getRed(), 2)
                 + Math.pow(colorRight.getGreen() - colorLeft.getGreen(), 2)

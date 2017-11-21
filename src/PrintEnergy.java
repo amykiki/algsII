@@ -59,19 +59,19 @@ public class PrintEnergy {
     }
 
     public static void debug() {
-//        String fileName = "6x5.png";
+        String fileName = "6x5.png";
 //        String fileName = "12x10.png";
 //        String fileName = "10x12.png";
-        String fileName = "4x6.png";
+//        String fileName = "4x6.png";
 //        String fileName = "chameleon.png";
 //        String fileName = "diagonals.png";
-        String picFile = filePath + fileName;
-        Picture picture = new Picture(picFile);
+        Picture picture = genPic(fileName);
 
 //        printPicture(picture);
 //        picture.show();
         SeamCarver sc = new SeamCarver(picture);
-        sc.removeVerticalSeam(null);
+        int[] seam = sc.findHorizontalSeam();
+        sc.removeHorizontalSeam(seam);
        /* StdOut.printf("Printing energy calculated for each pixel.\n");
 
         for (int row = 0; row < sc.height(); row++) {
@@ -147,8 +147,8 @@ public class PrintEnergy {
         }
     }*/
     public static void main(String[] args) {
-        testSeamCarver();
-//        debug();
+//        testSeamCarver();
+        debug();
 //        testTopoOrder();
     }
 
