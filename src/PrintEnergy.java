@@ -101,6 +101,21 @@ public class PrintEnergy {
         Picture picture = new Picture(picFile);
         return picture;
     }
+
+    /*public static void testEngery(String fileName) {
+        Picture picture = genPic(fileName);
+        SeamCarver sc = new SeamCarver(picture);
+        double[] e1 = sc.getEnergy();
+        int[] seam = sc.findVerticalSeam();
+        CommonUtil.printIntArray(seam, 6);
+        sc.removeVerticalSeam(seam);
+        double[] e2 = sc.getEnergy();
+        CommonUtil.printArray(e1, 6);
+        StdOut.println("==============");
+        CommonUtil.printArray(e2, 5);
+        StdOut.println(e2.length);
+
+    }*/
     /*public static void testTopoOrder() {
 //        Picture picture = genPic("diagonals.png");
         Picture picture = genPic("12x10.png");
@@ -132,9 +147,10 @@ public class PrintEnergy {
         }
     }*/
     public static void main(String[] args) {
-        testSeamCarver();
+//        testSeamCarver();
 //        debug();
 //        testTopoOrder();
+        testEngery("6x5.png");
     }
 
 }

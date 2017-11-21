@@ -209,11 +209,14 @@ public class SeamCarver {
                 throw new IllegalArgumentException("remove Horizon adjecnt index is invalid: lastRow" + lastRow
                         + ", current Row" + currentRow);
             }
-            for (int row = 0; row < carvedPic.height(); row++) {
+            for (int row = 0; row < picture.height(); row++) {
+                if (row == currentRow) {
+                    continue;
+                }
                 if (row < currentRow) {
                     carvedPic.setRGB(col, row, picture.getRGB(col, row));
                 }else {
-                    carvedPic.setRGB(col, row, picture.getRGB(col, row + 1));
+                    carvedPic.setRGB(col, row - 1, picture.getRGB(col, row));
                 }
 
                 if (row < (currentRow - 1)) {
@@ -233,11 +236,12 @@ public class SeamCarver {
         for(int col = 0; col < width; col++) {
             for(int j = 0; j < 2; j++) {
                 int row = changes[col * 2 + j];
-                if(!validateCol(row))
+                if(!validateRow(row))
                     continue;
                 nextEnergy[row * width + col] = caclPixelEnergy(col, row);
             }
         }
+        energy = nextEnergy;
     }
 
     /**
@@ -270,11 +274,14 @@ public class SeamCarver {
                 throw new IllegalArgumentException("removeVertical adjecnt index is invalid: lastcol" + lastCol
                         + ", current Col" + currentCol);
             }
-            for(int col = 0; col < carvedPic.width(); col++) {
+            for(int col = 0; col < picture.width(); col++) {
+                if (col == currentCol) {
+                    continue;
+                }
                 if (col < currentCol) {
                     carvedPic.setRGB(col, row, picture.getRGB(col, row));
                 }else {
-                    carvedPic.setRGB(col, row, picture.getRGB(col+1, row));
+                    carvedPic.setRGB(col - 1, row, picture.getRGB(col, row));
                 }
 
                 if (col < (currentCol - 1)) {
@@ -299,6 +306,7 @@ public class SeamCarver {
                 nextEnergy[row * width + col] = caclPixelEnergy(col, row);
             }
         }
+        energy = nextEnergy;
 
     }
 
