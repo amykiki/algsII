@@ -150,7 +150,6 @@ public class PrintEnergy {
 //        testSeamCarver();
 //        debug();
 //        testTopoOrder();
-        testEngery("6x5.png");
     }
 
 }
