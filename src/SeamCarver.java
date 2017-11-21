@@ -3,7 +3,6 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-//    private Picture picture;
     private int height;
     private int width;
     private double[] energy;
@@ -12,7 +11,6 @@ public class SeamCarver {
         if (pic == null) {
             throw new IllegalArgumentException("Construtor pic should not be null!");
         }
-//        picture = new Picture(pic);
         height = pic.height();
         width = pic.width();
         rgbs = new int[width * height];
