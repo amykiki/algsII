@@ -8,14 +8,6 @@ public class SeamCarver {
     private int width;
     private double[] energy;
 
-    /**
-     * 注意以下属性是全局使用的，这些数组初始大小为picture的原始大小，
-     * 后续picture的缩减不会减小数组大小
-     * 所以需要注意坐标的边界值
-     */
-//    private int[] toplogicOrder;
-    private double[] distTo;
-    private int[] edgeTo;
     public SeamCarver(Picture pic) {
         if (pic == null) {
             throw new IllegalArgumentException("Construtor pic should not be null!");
@@ -27,9 +19,6 @@ public class SeamCarver {
         energy = new double[N];
         //计算初始energy
         caclPicEngery();
-//        toplogicOrder = new int[N];
-        distTo = new double[N + 1];
-        edgeTo = new int[N + 1];
     }
 
     public Picture picture() {
@@ -65,7 +54,7 @@ public class SeamCarver {
         }
 
         int v = width*height;
-        findEdgeTo(true);
+        int[] edgeTo = findEdgeTo(true);
         for(int col = width() - 1; col >= 0; col--) {
             v = edgeTo[v];
             horizonSeam[col] = v / width;
@@ -86,7 +75,7 @@ public class SeamCarver {
         }
 
         int v = width*height;
-        findEdgeTo(false);
+        int[] edgeTo = findEdgeTo(false);
         for(int row = height - 1; row>= 0; row--) {
             v = edgeTo[v];
             verticalSeam[row] = v % width;
@@ -94,8 +83,10 @@ public class SeamCarver {
         return verticalSeam;
     }
 
-    private void findEdgeTo(boolean horizontal) {
+    private int[] findEdgeTo(boolean horizontal) {
         int N = width * height;
+        double[] distTo = new double[N + 1];
+        int[] edgeTo = new int[N + 1];
         distTo[N] = Double.MAX_VALUE;
         edgeTo[N] = -1;
         if (horizontal) {
@@ -125,11 +116,6 @@ public class SeamCarver {
             }
         }
 
-        /**
-         * 计算topological order注意这个数组是会被持续使用的，
-         * 因此i的最大值应为当前picture的大小 - 1
-         * 而不为topological数组的length
-         */
         int[] toplogicOrder;
         if (horizontal) {
             toplogicOrder = quickHorizontalTopoOrder();
@@ -160,6 +146,7 @@ public class SeamCarver {
                 }
             }
         }
+        return edgeTo;
     }
     private void relax(double[] distTo, int[] edgeTo, int wCol, int wRow, int v){
         if (!validateCol(wCol) || !validateRow(wRow)) {
@@ -310,45 +297,6 @@ public class SeamCarver {
 
     }
 
-    /*private void genToplogicalOrder(boolean horizontal) {
-        Stack<Integer> stack = new Stack<>();
-        int marked = 0;
-        stack.push(0);
-        int next = 1;
-        int N = width * height;
-        boolean[] visited = new boolean[N];
-        int last = N - 1;
-        while (marked != N) {
-            while (stack.isEmpty()) {
-                if(visited[next]){
-                    next++;
-                    continue;
-                }
-                stack.push(next);
-                next++;
-            }
-            int peek = stack.peek();
-            boolean pushResult;
-            if (horizontal) {
-                pushResult = pushHorizontalStack(peek, stack, visited);
-            }else {
-                pushResult = pushStack(peek, stack, visited);
-            }
-            if (!pushResult) {
-                stack.pop();
-                marked++;
-                visited[peek] = true;
-                toplogicOrder[last] = peek;
-                last--;
-            }
-        }
-    }*/
-
-    /*public int[] topoOrder(boolean horizontal) {
-        genToplogicalOrder(horizontal);
-        return toplogicOrder;
-    }*/
-
     private int[] quickVerticalTopoOrder() {
         int[] quickTopo = new int[width * height];
         int startRow = height - 1;
@@ -397,54 +345,6 @@ public class SeamCarver {
         return quickTopo;
     }
 
-    /*private boolean pushStack(int i, Stack<Integer> stack, boolean[] visited) {
-        int col = i % width;
-        int nextRow = i /width + 1;
-
-
-        if(!validateRow(nextRow))
-            return false;
-
-        int nextIndex = nextRow * width + col;
-        if (!visited[nextIndex]) {
-            stack.push(nextIndex);
-            return true;
-        }
-        if(validateCol(col - 1) && !visited[nextIndex - 1]){
-            stack.push(nextIndex - 1);
-            return true;
-        }
-        if (validateCol(col + 1) && !visited[nextIndex + 1]) {
-            stack.push(nextIndex + 1);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean pushHorizontalStack(int i, Stack<Integer> stack, boolean[] visited) {
-        int row = i / width;
-        int nextCol = i % width + 1;
-
-        if (!validateCol(nextCol)) {
-            return false;
-        }
-
-        int nextIndex = i + 1;
-        if (!visited[nextIndex]) {
-            stack.push(nextIndex);
-            return true;
-        }
-        if (validateRow(row - 1) && !visited[nextIndex - width]) {
-            stack.push(nextIndex - width);
-            return true;
-        }
-
-        if (validateRow(row + 1) && !visited[nextIndex + width]) {
-            stack.push(nextIndex + width);
-            return true;
-        }
-        return false;
-    }*/
     private void initArray(int[] arr, int value) {
         for(int i = 0; i < arr.length; i++) {
             arr[i] = value;
@@ -500,4 +400,91 @@ public class SeamCarver {
                 + Math.pow(colorDown.getBlue() - colorUp.getBlue(), 2);
         return Math.sqrt(xSquare + ySquare);
     }
+
+    /*private void genToplogicalOrder(boolean horizontal) {
+        Stack<Integer> stack = new Stack<>();
+        int marked = 0;
+        stack.push(0);
+        int next = 1;
+        int N = width * height;
+        boolean[] visited = new boolean[N];
+        int last = N - 1;
+        while (marked != N) {
+            while (stack.isEmpty()) {
+                if(visited[next]){
+                    next++;
+                    continue;
+                }
+                stack.push(next);
+                next++;
+            }
+            int peek = stack.peek();
+            boolean pushResult;
+            if (horizontal) {
+                pushResult = pushHorizontalStack(peek, stack, visited);
+            }else {
+                pushResult = pushStack(peek, stack, visited);
+            }
+            if (!pushResult) {
+                stack.pop();
+                marked++;
+                visited[peek] = true;
+                toplogicOrder[last] = peek;
+                last--;
+            }
+        }
+    }*/
+
+    /*public int[] topoOrder(boolean horizontal) {
+        genToplogicalOrder(horizontal);
+        return toplogicOrder;
+    }*/
+    /*private boolean pushStack(int i, Stack<Integer> stack, boolean[] visited) {
+        int col = i % width;
+        int nextRow = i /width + 1;
+
+
+        if(!validateRow(nextRow))
+            return false;
+
+        int nextIndex = nextRow * width + col;
+        if (!visited[nextIndex]) {
+            stack.push(nextIndex);
+            return true;
+        }
+        if(validateCol(col - 1) && !visited[nextIndex - 1]){
+            stack.push(nextIndex - 1);
+            return true;
+        }
+        if (validateCol(col + 1) && !visited[nextIndex + 1]) {
+            stack.push(nextIndex + 1);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean pushHorizontalStack(int i, Stack<Integer> stack, boolean[] visited) {
+        int row = i / width;
+        int nextCol = i % width + 1;
+
+        if (!validateCol(nextCol)) {
+            return false;
+        }
+
+        int nextIndex = i + 1;
+        if (!visited[nextIndex]) {
+            stack.push(nextIndex);
+            return true;
+        }
+        if (validateRow(row - 1) && !visited[nextIndex - width]) {
+            stack.push(nextIndex - width);
+            return true;
+        }
+
+        if (validateRow(row + 1) && !visited[nextIndex + width]) {
+            stack.push(nextIndex + width);
+            return true;
+        }
+        return false;
+    }*/
 }

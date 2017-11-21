@@ -147,7 +147,7 @@ public class PrintEnergy {
         }
     }*/
     public static void main(String[] args) {
-//        testSeamCarver();
+        testSeamCarver();
 //        debug();
 //        testTopoOrder();
     }
