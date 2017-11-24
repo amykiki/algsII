@@ -5,17 +5,17 @@ import java.awt.Color;
 public class SeamCarver {
     private int height;
     private int width;
-    private double[] energy;
-    private int[] rgbs;
+    private double [][] energy2D;
+    private int[][] rgbs2D;
+
     public SeamCarver(Picture pic) {
         if (pic == null) {
             throw new IllegalArgumentException("Construtor pic should not be null!");
         }
         height = pic.height();
         width = pic.width();
-        rgbs = new int[width * height];
-        int N = width * height;
-        energy = new double[N];
+        rgbs2D = new int[height][width];
+        energy2D = new double[height][width];
         picToRgbs(pic);
         //计算初始energy
         caclPicEngery();
@@ -37,8 +37,7 @@ public class SeamCarver {
         validateHeight(row);
         validateWidth(col);
 
-        int index = row*width + col;
-        return energy[index];
+        return energy2D[row][col];
     }
 
     /**
@@ -91,12 +90,12 @@ public class SeamCarver {
         edgeTo[N] = -1;
         if (horizontal) {
             for(int row = 0; row < height; row++) {
-                distTo[row*width] = energy[row*width];
+                distTo[row*width] = energy2D[row][0];
                 edgeTo[row*width] = -1;
             }
         }else {
             for(int col = 0; col < width; col++) {
-                distTo[col] = energy[col];
+                distTo[col] = energy2D[0][col];
                 edgeTo[col] = -1;
             }
         }
@@ -153,8 +152,8 @@ public class SeamCarver {
             return;
         }
         int w = wRow * width + wCol;
-        if (distTo[w] >= distTo[v] + energy[w]) {
-            distTo[w] = distTo[v] + energy[w];
+        if (distTo[w] >= distTo[v] + energy2D[wRow][wCol]) {
+            distTo[w] = distTo[v] + energy2D[wRow][wCol];
             edgeTo[w] = v;
         }
     }
@@ -174,7 +173,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("seam Indices should not be null!");
         }
-        int[] carvedRgbs;
+        int[][] carvedRgbs2D;
         if (height <= 1) {
             throw new IllegalArgumentException("picture height <= 1, can not be removed horizontal");
         }
@@ -182,9 +181,10 @@ public class SeamCarver {
             throw new IllegalArgumentException("remove horizontal seam length " + seam.length + " not equal to " + width);
         }
         int lastRow = -1;
-        carvedRgbs = new int[(height - 1) * width];
+        carvedRgbs2D = new int[height - 1][width];
+
         int nextHeight = height - 1;
-        double[] nextEnergy = new double[width * nextHeight];
+        double[][] nextEnergy2D = new double[nextHeight][width];
         int[] changes = new int[width * 2];
         initArray(changes, -1);
         for(int col = 0; col < width; col++) {
@@ -197,34 +197,34 @@ public class SeamCarver {
                         + ", current Row" + currentRow);
             }
             for(int row = 0; row < currentRow; row++) {
-                carvedRgbs[row * width + col] = rgbs[row * width + col];
+                carvedRgbs2D[row][col] = rgbs2D[row][col];
                 if (row == currentRow - 1) {
                     changes[col * 2] = currentRow - 1;
                 }else {
-                    nextEnergy[row * width + col] = energy[row * width + col];
+                    nextEnergy2D[row][col] = energy2D[row][col];
                 }
             }
             for(int row = currentRow + 1; row < height; row++) {
-                carvedRgbs[(row - 1) * width + col] = rgbs[row * width + col];
+                carvedRgbs2D[row - 1][col] = rgbs2D[row][col];
                 if (row == currentRow + 1) {
                     changes[col * 2 + 1] = currentRow;
                 }else {
-                    nextEnergy[(row-1) * width + col] = energy[row * width + col];
+                    nextEnergy2D[row -1][col] = energy2D[row][col];
                 }
             }
             lastRow = currentRow;
         }
         height = height - 1;
-        rgbs = carvedRgbs;
+        rgbs2D = carvedRgbs2D;
         for(int col = 0; col < width; col++) {
             for(int j = 0; j < 2; j++) {
                 int row = changes[col * 2 + j];
                 if(!validateRow(row))
                     continue;
-                nextEnergy[row * width + col] = caclPixelEnergy(col, row);
+                nextEnergy2D[row][col] = caclPixelEnergy(col, row);
             }
         }
-        energy = nextEnergy;
+        energy2D = nextEnergy2D;
     }
 
     /**
@@ -235,7 +235,7 @@ public class SeamCarver {
         if (seam == null) {
             throw new IllegalArgumentException("seam Indices should not be null!");
         }
-        int[] carvedRgbs;
+        int[][] carvedRgbs2D;
         if (width <= 1) {
             throw new IllegalArgumentException("picture width <= 1, can not be removed vertical");
         }
@@ -243,11 +243,10 @@ public class SeamCarver {
             throw new IllegalArgumentException("remove vertical seam length " + seam.length + " not equal to " + height);
         }
         int lastCol = -1;
-        carvedRgbs = new int[(width - 1) * height];
+        carvedRgbs2D = new int[height][width - 1];
         int[] changes = new int[height * 2];
-        double[] nextEnergy = new double[(width - 1) * height];
+        double[][] nextEnergy2D = new double[height][width - 1];
         initArray(changes, -1);
-        int nextWidth = width - 1;
         for(int row = 0; row < height; row++) {
             int currentCol = seam[row];
             if (!validateCol(currentCol)) {
@@ -258,31 +257,31 @@ public class SeamCarver {
                         + ", current Col" + currentCol);
             }
 
-            System.arraycopy(rgbs, row*width, carvedRgbs, row*nextWidth, currentCol);
+            System.arraycopy(rgbs2D[row], 0, carvedRgbs2D[row], 0, currentCol);
             if ((currentCol + 1) < width) {
-                System.arraycopy(rgbs, row*width + currentCol + 1, carvedRgbs, row*nextWidth + currentCol, width - currentCol - 1);
+                System.arraycopy(rgbs2D[row], currentCol + 1, carvedRgbs2D[row], currentCol, width - currentCol - 1);
             }
             if (currentCol - 1 > 0) {
-                System.arraycopy(energy, row * width, nextEnergy, row * nextWidth, currentCol - 1);
+                System.arraycopy(energy2D[row], 0, nextEnergy2D[row], 0, currentCol - 1);
             }
             if (currentCol + 2 < width) {
-                System.arraycopy(energy, row * width + currentCol + 2, nextEnergy, row * nextWidth + currentCol +1, width - (currentCol + 2));
+                System.arraycopy(energy2D[row], currentCol + 2, nextEnergy2D[row], currentCol +1, width - (currentCol + 2));
             }
             changes[row * 2] = currentCol - 1;
             changes[row * 2 + 1] = currentCol;
             lastCol = currentCol;
         }
         width = width - 1;
-        rgbs = carvedRgbs;
+        rgbs2D = carvedRgbs2D;
         for(int row = 0; row < height; row++) {
             for(int j = 0; j < 2; j++) {
                 int col = changes[row * 2 + j];
                 if(!validateCol(col))
                     continue;
-                nextEnergy[row * width + col] = caclPixelEnergy(col, row);
+                nextEnergy2D[row][col] = caclPixelEnergy(col, row);
             }
         }
-        energy = nextEnergy;
+        energy2D = nextEnergy2D;
 
     }
 
@@ -337,7 +336,7 @@ public class SeamCarver {
     private void picToRgbs(Picture pic) {
         for(int row = 0; row < pic.height(); row++) {
             for(int col = 0; col < pic.width(); col++) {
-                rgbs[row * width + col] = pic.getRGB(col, row);
+                rgbs2D[row][col] = pic.getRGB(col, row);
             }
         }
     }
@@ -346,7 +345,7 @@ public class SeamCarver {
         Picture pic = new Picture(width, height);
         for(int row = 0; row < height; row++) {
             for(int col = 0; col < width; col++) {
-                pic.setRGB(col, row, rgbs[row*width + col]);
+                pic.setRGB(col, row,  rgbs2D[row][col]);
             }
         }
         return pic;
@@ -385,7 +384,7 @@ public class SeamCarver {
     private void caclPicEngery() {
         for (int col = 0; col < width; col++) {
             for(int row = 0; row < height; row++) {
-                energy[row * width + col] = caclPixelEnergy(col, row);
+                energy2D[row][col] = caclPixelEnergy(col, row);
             }
         }
     }
@@ -393,10 +392,10 @@ public class SeamCarver {
         if (row == 0 || row == (height - 1) || col == 0 || col == (width - 1)) {
             return 1000;
         }
-        Color colorUp = new Color(rgbs[(row - 1) * width + col]);
-        Color colorDown = new Color(rgbs[(row + 1) * width + col]);
-        Color colorLeft = new Color(rgbs[row * width + col - 1]);
-        Color colorRight = new Color(rgbs[row * width + col + 1]);
+        Color colorUp = new Color( rgbs2D[row-1][col]);
+        Color colorDown = new Color(rgbs2D[row + 1][col]);
+        Color colorLeft = new Color(rgbs2D[row][col - 1]);
+        Color colorRight = new Color(rgbs2D[row][col + 1]);
 
         double xSquare = Math.pow(colorRight.getRed() - colorLeft.getRed(), 2)
                 + Math.pow(colorRight.getGreen() - colorLeft.getGreen(), 2)
