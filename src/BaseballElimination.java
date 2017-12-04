@@ -1,3 +1,6 @@
+import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.FlowEdge;
+import edu.princeton.cs.algs4.FlowNetwork;
 import edu.princeton.cs.algs4.In;
 
 import java.util.HashMap;
@@ -9,11 +12,15 @@ public class BaseballElimination {
     private HashMap<String, Integer> teamMap;
     private String[] teamNames;
     private int[] remainGames;
+    private int[][] rgMap;
     private final int WIN = 0;
     private final int LOSE = 1;
     private final int REMAIN = 2;
     private final int MAXWIN = 3;
     private final int SUB = 4;
+    private Bag<FlowEdge>[] flowEdges;
+    private int START;
+    private int END;
     public BaseballElimination(String filename) {
         try {
             In in = new In(filename);
@@ -23,6 +30,9 @@ public class BaseballElimination {
             teamMap = new HashMap<>();
             teamNames = new String[teamNum];
             remainGames = new int[teamNum * (teamNum - 1) / 2];
+            rgMap = new int[remainGames.length][2];
+            END = remainGames.length + teamNum + 1; // end index
+            START = END - 1;
             int rgIndex = 0;
             for(int i = 0; i < teamNum; i++) {
                 String str = in.readLine();
@@ -40,9 +50,10 @@ public class BaseballElimination {
                 }
                 for(int j = 5 + i; j < teaminfo.length; j++) {
                     remainGames[rgIndex] = Integer.valueOf(teaminfo[j]);
+                    rgMap[rgIndex][0] = i;
+                    rgMap[rgIndex][1] = j - 4;
                     rgIndex++;
                 }
-
             }
         } catch (Exception e) {
             throw new IllegalArgumentException("Can't Open the Team File " + filename);
@@ -97,6 +108,14 @@ public class BaseballElimination {
         validateTeam(team);
         return null;
     }
+
+    private int genFlowNetwork() {
+        for(int i = 0; i < remainGames.length; i++) {
+
+        }
+        return 0;
+    }
+
     private void validateTeam(String team) {
         if (!teamMap.containsKey(team)) {
             throw new IllegalArgumentException("Invalid Team " + team);
