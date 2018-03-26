@@ -2,6 +2,9 @@ package impl;
 
 import interfaces.App1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainTest {
     public static void test1() {
         Impl1A a = new Impl1A();
@@ -17,5 +20,7 @@ public class MainTest {
     public static void main(String[] args) {
         test1();
         App1.out2();
+        List<String> str = new ArrayList<>();
+
     }
 }
